@@ -26,6 +26,7 @@ testloader = DataLoader(testset, batch_size=64, shuffle=False)
 # Modify AlexNet for 1 channel input and 10 classes output
 class AlexNet(nn.Module):
     def __init__(self, num_classes=10):
+
         super(AlexNet, self).__init__()
         self.features_extractor = nn.Sequential(
             nn.Conv2d(1, 64, kernel_size=11, stride=4, padding=2),
