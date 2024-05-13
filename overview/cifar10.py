@@ -22,11 +22,11 @@ transform = transforms.Compose([
 
 # Load FashionMNIST dataset
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True,  download=True, transform=transform)
-trainloader = DataLoader(trainset, batch_size=8, shuffle=True)
+trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True, transform=transform)
-testloader = DataLoader(testset, batch_size=8, shuffle=False)
+testloader = DataLoader(testset, batch_size=32, shuffle=False)
 
 # Modify AlexNet for 1 channel input and 10 classes output
 class AlexNet(nn.Module):
@@ -72,6 +72,9 @@ model = AlexNet().to(device)
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.AdamW(model.parameters(), lr=0.0001, weight_decay=0.01)
+
+# Define scheduler
+scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0)
 
 # Function to train the model
 def train_model():
