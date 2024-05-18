@@ -6,12 +6,50 @@ from torchvision import models
 import torch.nn as nn
 import torch.optim as optim
 import os
-
+import argparse
+import yaml
 
 from tqdm import tqdm
 
+with open('./config/Alexnet_cifar10.yaml') as f:
+    film = yaml.load(f, Loader=yaml.FullLoader)
+    print(film)
+
+
+parser = argparse.ArgumentParser(description='Train AlexNet on CIFAR-10')
+parser.add_argument('--batch_size', type=int, default=32, help='input batch size for training (default: 32)')
+parser.add_argument('--learning_rate', type=float, default=0.001, help='learning rate (default: 0.001)')
+parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
+parser.add_argument('--num_classes', type=int, default=10, help='number of classes (default: 10)')
+parser.add_argument('--print_period', type=int, default=100, help='how many batches to wait before logging training status (default: 100)')
+parser.add_argument('--device', type=str, default='cuda', help='device to use for training (default: cuda)')
+parser.add_argument('--data_root', type=str, default='./data', help='directory for storing input data (default: ./data)')
+parser.add_argument('--save_root', type=str, default='./result/max_acc.pth', help='path to save the best model (default: ./result/max_acc.pth)')
+parser.add_argument('--save_dir', type=str, default='./result', help='directory to save results (default: ./result)')
+
+args = parser.parse_args()
+
+breakpoint()
+
+
+
+BATCH_SIZE = args.batch_size
+LEARNING_RATE = args.learning_rate
+EPOCH_NUM = args.epochs
+NUM_CLASSES = args.num_classes
+PRINT_PERIOD = args.print_period
+DEVICE = args.device
+DATA_ROOT = args.data_root
+SAVE_ROOT = args.save_root
+SAVE_DIR = args.save_dir
+
+
+
+#epoch는 정의된 함수?
+
+
 # Set device for training
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device(DEVICE)
 
 # Define transformations for the input data
 transform = transforms.Compose([
@@ -21,16 +59,16 @@ transform = transforms.Compose([
     ])
 
 # Load FashionMNIST dataset
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True,  download=True, transform=transform)
-trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
+trainset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=True,  download=True, transform=transform)
+trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True)
 
-testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+testset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=False,
                                        download=True, transform=transform)
-testloader = DataLoader(testset, batch_size=32, shuffle=False)
+testloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False)
 
 # Modify AlexNet for 1 channel input and 10 classes output
 class AlexNet(nn.Module):
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes: int):
 
         super(AlexNet, self).__init__()
         self.features_extractor = nn.Sequential(
@@ -72,21 +110,18 @@ class AlexNet(nn.Module):
         return x
 
 # Initialize the model
-model = AlexNet().to(device)
+model = AlexNet(NUM_CLASSES).to(device)
 
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
-
-# Define scheduler
-scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0)
+optimizer = torch.optim.SGD(model.parameters(), LEARNING_RATE)
 
 # Function to train the model
 def train_model():
     model.train()
 
     max_acc = -1
-    for epoch in range(10):  # loop over the dataset multiple times
+    for epoch in range(EPOCH_NUM):  # loop over the dataset multiple times
         running_loss = 0.0
 
         for i, data in tqdm(enumerate(trainloader, 0)):
@@ -102,15 +137,15 @@ def train_model():
             optimizer.step()
 
             running_loss += loss.item()
-            if i % 100 == 0:    # print every 100 mini-batches
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 100:.3f}')
+            if i % PRINT_PERIOD == 0:    # print every [PRINT_PERIOD] mini-batches
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / PRINT_PERIOD:.3f}')
                 running_loss = 0.0
               
         cur_acc = validate_model()
         if cur_acc >= max_acc:
             max_acc = cur_acc
-            os.makedirs('./result',exist_ok=True)
-            torch.save(model.state_dict(), './result/max_acc.pth')
+            os.makedirs(SAVE_DIR,exist_ok=True)
+            torch.save(model.state_dict(), SAVE_ROOT)
               
 # Function to validate the model
 def validate_model():

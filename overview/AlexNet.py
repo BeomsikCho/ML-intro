@@ -17,7 +17,6 @@ transform = transforms.Compose([
     transforms.ToTensor(),  # Convert images to Tensor
     transforms.Normalize((0.5,), (0.5,))  # Normalize the images
 ])
-
 # Load FashionMNIST dataset
 trainset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
 trainloader = DataLoader(trainset, batch_size=64, shuffle=True)
@@ -77,7 +76,7 @@ def train_model():
         running_loss = 0.0
         for i, data in tqdm(enumerate(trainloader, 0)):
             inputs, labels = data[0].to(device), data[1].to(device)
-
+            breakpoint()
             # zero the parameter gradients
             optimizer.zero_grad()
 

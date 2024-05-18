@@ -1,0 +1,20 @@
+setup_cfg:
+  device: 'cuda'
+
+data_cfg:
+  batch_size: 32
+
+model_cfg:
+  num_classes: 10
+
+train_cfg:
+  epoch: 10
+  learning_rate: 0.001
+  print_period: 100
+
+
+
+# DEVICE = args.device
+# DATA_ROOT = args.data_root
+# SAVE_ROOT = args.save_root
+# SAVE_DIR = args.save_dir
