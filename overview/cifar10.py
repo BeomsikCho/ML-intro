@@ -11,37 +11,26 @@ import yaml
 
 from tqdm import tqdm
 
-with open('./config/Alexnet_cifar10.yaml') as f:
-    film = yaml.load(f, Loader=yaml.FullLoader)
-    print(film)
 
-
+# Define argparse arguments
 parser = argparse.ArgumentParser(description='Train AlexNet on CIFAR-10')
-parser.add_argument('--batch_size', type=int, default=32, help='input batch size for training (default: 32)')
-parser.add_argument('--learning_rate', type=float, default=0.001, help='learning rate (default: 0.001)')
-parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
-parser.add_argument('--num_classes', type=int, default=10, help='number of classes (default: 10)')
-parser.add_argument('--print_period', type=int, default=100, help='how many batches to wait before logging training status (default: 100)')
-parser.add_argument('--device', type=str, default='cuda', help='device to use for training (default: cuda)')
-parser.add_argument('--data_root', type=str, default='./data', help='directory for storing input data (default: ./data)')
-parser.add_argument('--save_root', type=str, default='./result/max_acc.pth', help='path to save the best model (default: ./result/max_acc.pth)')
-parser.add_argument('--save_dir', type=str, default='./result', help='directory to save results (default: ./result)')
-
+parser.add_argument('--config_path', type=str, default='./onfig/Alexnet_cifar10.yaml', help='Path to config YAML file')
 args = parser.parse_args()
 
-breakpoint()
+# Load configurations from YAML file
+with open(args.config_path) as f:
+    cfgs = yaml.load(f, Loader=yaml.FullLoader)
 
 
-
-BATCH_SIZE = args.batch_size
-LEARNING_RATE = args.learning_rate
-EPOCH_NUM = args.epochs
-NUM_CLASSES = args.num_classes
-PRINT_PERIOD = args.print_period
-DEVICE = args.device
-DATA_ROOT = args.data_root
-SAVE_ROOT = args.save_root
-SAVE_DIR = args.save_dir
+BATCH_SIZE = cfgs['data_cfg']['batch_size']
+LEARNING_RATE = cfgs['train_cfg']['learning_rate']
+EPOCH_NUM = cfgs['train_cfg']['epoch']
+NUM_CLASSES = cfgs['model_cfg']['num_classes']
+PRINT_PERIOD = cfgs['train_cfg']['print_period']
+DEVICE = cfgs['setup_cfg']['device']
+DATA_ROOT = cfgs['data_cfg']['data_root']
+SAVE_ROOT = cfgs['train_cfg']['save_root']
+SAVE_DIR = cfgs['train_cfg']['save_dir']
 
 
 
