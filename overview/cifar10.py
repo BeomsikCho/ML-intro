@@ -1,20 +1,29 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from torchvision import datasets
 from torch.utils.data import DataLoader
 from torchvision import models
+from torchvision import utils
 import torch.nn as nn
+import torch.nn.functional as F
+from torchsummary import summary
+from torch import optim
+import matplotlib.pyplot as plt
+
+import numpy as np
 import torch.optim as optim
 import os
 import argparse
 import yaml
-
+import time
+import copy
 from tqdm import tqdm
 
-
+# --------------------------------------- 건들지 말 것 ---------------------------------------
 # Define argparse arguments
 parser = argparse.ArgumentParser(description='Train AlexNet on CIFAR-10')
-parser.add_argument('--config_path', type=str, default='./onfig/Alexnet_cifar10.yaml', help='Path to config YAML file')
+parser.add_argument('--config_path', type=str, default='./config/Alexnet_cifar10.yaml', help='Path to config YAML file')
 args = parser.parse_args()
 
 # Load configurations from YAML file
@@ -33,12 +42,10 @@ SAVE_ROOT = cfgs['train_cfg']['save_root']
 SAVE_DIR = cfgs['train_cfg']['save_dir']
 
 
-
-#epoch는 정의된 함수?
-
-
 # Set device for training
 device = torch.device(DEVICE)
+# --------------------------------------- 건들지 말 것 ---------------------------------------
+
 
 # Define transformations for the input data
 transform = transforms.Compose([
@@ -55,59 +62,174 @@ testset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=False,
                                        download=True, transform=transform)
 testloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False)
 
-# Modify AlexNet for 1 channel input and 10 classes output
-class AlexNet(nn.Module):
-    def __init__(self, num_classes: int):
 
-        super(AlexNet, self).__init__()
-        self.features_extractor = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
-            nn.GroupNorm(4, 64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(64, 192, kernel_size=5, padding=2),
-            nn.GroupNorm(4, 192),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(192, 384, kernel_size=3, padding=1),
-            nn.GroupNorm(4, 384),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.GroupNorm(4, 256),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.GroupNorm(4, 256),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
+class BasicBlock(nn.Module):
+    expansion = 1
+    def __init__(self, in_channels, out_channels, stride=1):
+        super().__init__()
+
+        # BatchNorm에 bias가 포함되어 있으므로, conv2d는 bias=False로 설정합니다.
+        self.residual_function = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels * BasicBlock.expansion, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels * BasicBlock.expansion),
         )
-        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
-        )
+
+        # identity mapping, input과 output의 feature map size, filter 수가 동일한 경우 사용.
+        self.shortcut = nn.Sequential()
+
+        self.relu = nn.ReLU()
+
+        # projection mapping using 1x1conv
+        if stride != 1 or in_channels != BasicBlock.expansion * out_channels:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels * BasicBlock.expansion, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels * BasicBlock.expansion)
+            )
 
     def forward(self, x):
-        x = self.features_extractor(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
+        x = self.residual_function(x) + self.shortcut(x)
+        x = self.relu(x)
         return x
 
+# residual block 정의
+class BottleNeck(nn.Module):
+    expansion = 4
+    def __init__(self, in_channels, out_channels, stride=1):
+        super().__init__()
+
+        self.residual_function = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels * BottleNeck.expansion, kernel_size=1, stride=1, bias=False),
+            nn.BatchNorm2d(out_channels * BottleNeck.expansion),
+        )
+
+        self.shortcut = nn.Sequential()
+
+        self.relu = nn.ReLU()
+
+        if stride != 1 or in_channels != out_channels * BottleNeck.expansion:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels*BottleNeck.expansion, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels*BottleNeck.expansion)
+            )
+            
+    def forward(self, x):
+        x = self.residual_function(x) + self.shortcut(x)
+        x = self.relu(x)
+        return x
+    
+# ResNet 구조 정의
+class ResNet(nn.Module):
+    def __init__(self, block, num_block, num_classes=10, init_weights=True):
+        super().__init__()
+
+        self.in_channels=64
+
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+
+        self.conv2_x = self._make_layer(block, 64, num_block[0], 1)
+        self.conv3_x = self._make_layer(block, 128, num_block[1], 2)
+        self.conv4_x = self._make_layer(block, 256, num_block[2], 2)
+        self.conv5_x = self._make_layer(block, 512, num_block[3], 2)
+
+        self.avg_pool = nn.AdaptiveAvgPool2d((1,1))
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
+
+        # weights inittialization
+        if init_weights:
+            self._initialize_weights()
+
+    def _make_layer(self, block, out_channels, num_blocks, stride):
+        strides = [stride] + [1] * (num_blocks - 1)
+        layers = []
+        for stride in strides:
+            layers.append(block(self.in_channels, out_channels, stride))
+            self.in_channels = out_channels * block.expansion
+
+        return nn.Sequential(*layers)
+
+    def forward(self,x):
+        output = self.conv1(x)
+        output = self.conv2_x(output)
+        x = self.conv3_x(output)
+        x = self.conv4_x(x)
+        x = self.conv5_x(x)
+        x = self.avg_pool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        return x
+
+    # define weight initialization function
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
+
+def resnet18():
+    return ResNet(BasicBlock, [2,2,2,2])
+
+def resnet34():
+    return ResNet(BasicBlock, [3, 4, 6, 3])
+
+def resnet50():
+    return ResNet(BottleNeck, [3,4,6,3])
+
+def resnet101():
+    return ResNet(BottleNeck, [3, 4, 23, 3])
+
+def resnet152():
+    return ResNet(BottleNeck, [3, 8, 36, 3])
+
+
+
 # Initialize the model
-model = AlexNet(NUM_CLASSES).to(device)
+model = resnet50().to(device)
+
+x = torch.randn(3, 3, 224, 224).to(device)
+output = model(x)
+print(output.size())
+
 
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), LEARNING_RATE)
+opt= torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+optimizer = opt
+
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+lr_scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=10)
+
+# function to get current lr
+def get_lr(opt):
+    for param_group in opt.param_groups:
+        return param_group['lr']
+    
+
 
 # Function to train the model
 def train_model():
     model.train()
+
 
     max_acc = -1
     for epoch in range(EPOCH_NUM):  # loop over the dataset multiple times
@@ -156,3 +278,13 @@ def validate_model():
 if __name__ == "__main__":
     train_model()
     validate_model()
+
+
+# plot loss progress
+plt.title("Train-Val Loss")
+plt.plot(range(1,EPOCH_NUM+1),loss,label="train")
+plt.plot(range(1,EPOCH_NUM+1),loss,label="val")
+plt.ylabel("Loss")
+plt.xlabel("Training Epochs")
+plt.legend()
+plt.show()
