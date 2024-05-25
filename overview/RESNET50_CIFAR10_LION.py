@@ -20,10 +20,12 @@ import time
 import copy
 from tqdm import tqdm
 
+from lion_pytorch import Lion
+
 # --------------------------------------- 건들지 말 것 ---------------------------------------
 # Define argparse arguments
-parser = argparse.ArgumentParser(description='Train AlexNet on CIFAR-10')
-parser.add_argument('--config_path', type=str, default='./config/Alexnet_cifar10.yaml', help='Path to config YAML file')
+parser = argparse.ArgumentParser(description='Train RESNET on CIFAR-10')
+parser.add_argument('--config_path', type=str, default='./config/RESNET_cifar10.yaml', help='Path to config YAML file')
 args = parser.parse_args()
 
 # Load configurations from YAML file
@@ -56,11 +58,11 @@ transform = transforms.Compose([
 
 # Load FashionMNIST dataset
 trainset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=True,  download=True, transform=transform)
-trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True)
+trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
 
 testset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=False,
                                        download=True, transform=transform)
-testloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False)
+testloader = DataLoader(testset, batch_size=BATCH_SIZE, num_workers=4, shuffle=False)
 
 
 class BasicBlock(nn.Module):
@@ -213,7 +215,7 @@ print(output.size())
 
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-opt= torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+opt = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
 optimizer = opt
 
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -232,6 +234,8 @@ def train_model():
 
 
     max_acc = -1
+
+
     for epoch in range(EPOCH_NUM):  # loop over the dataset multiple times
         running_loss = 0.0
 
@@ -253,10 +257,15 @@ def train_model():
                 running_loss = 0.0
               
         cur_acc = validate_model()
+
+        lr_scheduler.step(cur_acc)   
+
         if cur_acc >= max_acc:
             max_acc = cur_acc
             os.makedirs(SAVE_DIR,exist_ok=True)
             torch.save(model.state_dict(), SAVE_ROOT)
+
+            
               
 # Function to validate the model
 def validate_model():
@@ -271,6 +280,10 @@ def validate_model():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
+            # loss = criterion(outputs, labels) ??
+            # running_loss += loss.item() ??
+
+    
     accuracy = 100 * correct / total
     print(f'Accuracy of the network on the 10000 test images: {accuracy:.2f}%')
     return accuracy

@@ -1,15 +1,15 @@
 setup_cfg:
-  device: 'cuda'
+  device: 'cuda:6'
 
 data_cfg:
   data_root: './data'
-  batch_size: 32
+  batch_size: 128
 
 model_cfg:
   num_classes: 10
 
 train_cfg:
-  epoch: 20
+  epoch: 300
   learning_rate: 0.001
   print_period: 100
 
