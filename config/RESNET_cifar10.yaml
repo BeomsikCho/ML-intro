@@ -1,0 +1,17 @@
+setup_cfg:
+  device: 'cuda:6'
+
+data_cfg:
+  data_root: './dataset'
+  batch_size: 128
+
+model_cfg:
+  num_classes: 10
+
+train_cfg:
+  epoch: 300
+  learning_rate: 0.001
+  print_period: 100
+  
+  save_root: './result/max_acc.pth'
+  save_dir: './result'
