@@ -1,4 +1,4 @@
 # data내의 파일은 git 업로드시 활용하지 않음
-data*
+dataset*
 *.pyc
 *.pth
