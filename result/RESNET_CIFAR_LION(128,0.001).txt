@@ -1,0 +1,123 @@
+torch.Size([3, 10])
+0it [00:00, ?it/s][1,     1] loss: 0.023
+100it [00:20,  5.01it/s][1,   101] loss: 1.989
+200it [00:40,  5.13it/s][1,   201] loss: 1.711
+300it [01:00,  5.06it/s][1,   301] loss: 1.577
+391it [01:18,  4.99it/s]
+Accuracy of the network on the 10000 test images: 45.09%
+0it [00:00, ?it/s][2,     1] loss: 0.015
+100it [00:19,  5.20it/s][2,   101] loss: 1.588
+200it [00:39,  5.10it/s][2,   201] loss: 1.488
+300it [00:58,  5.20it/s][2,   301] loss: 1.380
+391it [01:16,  5.10it/s]
+Accuracy of the network on the 10000 test images: 52.68%
+0it [00:00, ?it/s][3,     1] loss: 0.011
+100it [00:19,  5.24it/s][3,   101] loss: 1.244
+200it [00:38,  5.24it/s][3,   201] loss: 1.178
+300it [00:58,  5.23it/s][3,   301] loss: 1.126
+391it [01:15,  5.15it/s]
+Accuracy of the network on the 10000 test images: 62.84%
+0it [00:00, ?it/s][4,     1] loss: 0.013
+100it [00:19,  5.27it/s][4,   101] loss: 0.999
+200it [00:38,  5.23it/s][4,   201] loss: 0.962
+300it [00:58,  5.24it/s][4,   301] loss: 0.955
+391it [01:15,  5.17it/s]
+Accuracy of the network on the 10000 test images: 68.36%
+0it [00:00, ?it/s][5,     1] loss: 0.008
+100it [00:19,  5.25it/s][5,   101] loss: 0.845
+200it [00:38,  5.24it/s][5,   201] loss: 0.818
+300it [00:58,  5.25it/s][5,   301] loss: 0.801
+391it [01:15,  5.16it/s]
+Accuracy of the network on the 10000 test images: 70.42%
+0it [00:00, ?it/s][6,     1] loss: 0.008
+100it [00:19,  5.27it/s][6,   101] loss: 0.710
+200it [00:38,  5.25it/s][6,   201] loss: 0.698
+300it [00:58,  5.26it/s][6,   301] loss: 0.693
+391it [01:15,  5.17it/s]
+Accuracy of the network on the 10000 test images: 73.27%
+0it [00:00, ?it/s][7,     1] loss: 0.006
+100it [00:19,  5.29it/s][7,   101] loss: 0.607
+200it [00:38,  5.34it/s][7,   201] loss: 0.603
+300it [00:57,  5.33it/s][7,   301] loss: 0.597
+391it [01:15,  5.20it/s]
+Accuracy of the network on the 10000 test images: 76.00%
+0it [00:00, ?it/s][8,     1] loss: 0.006
+100it [00:19,  5.25it/s][8,   101] loss: 0.509
+200it [00:39,  5.18it/s][8,   201] loss: 0.508
+300it [00:58,  5.20it/s][8,   301] loss: 0.498
+391it [01:16,  5.10it/s]
+Accuracy of the network on the 10000 test images: 78.07%
+0it [00:00, ?it/s][9,     1] loss: 0.004
+100it [00:19,  5.17it/s][9,   101] loss: 0.407
+200it [00:39,  5.14it/s][9,   201] loss: 0.403
+300it [00:58,  5.19it/s][9,   301] loss: 0.414
+391it [01:16,  5.11it/s]
+Accuracy of the network on the 10000 test images: 79.05%
+0it [00:00, ?it/s][10,     1] loss: 0.003
+100it [00:19,  5.25it/s][10,   101] loss: 0.325
+200it [00:38,  5.28it/s][10,   201] loss: 0.317
+300it [00:58,  5.24it/s][10,   301] loss: 0.325
+391it [01:15,  5.15it/s]
+Accuracy of the network on the 10000 test images: 78.73%
+0it [00:00, ?it/s][11,     1] loss: 0.002
+100it [00:19,  5.13it/s][11,   101] loss: 0.240
+200it [00:39,  5.16it/s][11,   201] loss: 0.236
+300it [00:59,  5.12it/s][11,   301] loss: 0.243
+391it [01:17,  5.06it/s]
+Accuracy of the network on the 10000 test images: 79.63%
+0it [00:00, ?it/s][12,     1] loss: 0.002
+100it [00:19,  5.14it/s][12,   101] loss: 0.167
+200it [00:39,  5.20it/s][12,   201] loss: 0.181
+300it [00:59,  5.20it/s][12,   301] loss: 0.193
+391it [01:17,  5.07it/s]
+Accuracy of the network on the 10000 test images: 80.40%
+0it [00:00, ?it/s][13,     1] loss: 0.001
+100it [00:19,  5.27it/s][13,   101] loss: 0.134
+200it [00:38,  5.26it/s][13,   201] loss: 0.137
+300it [00:58,  5.27it/s][13,   301] loss: 0.150
+391it [01:15,  5.17it/s]
+Accuracy of the network on the 10000 test images: 80.12%
+0it [00:00, ?it/s][14,     1] loss: 0.001
+100it [00:19,  5.29it/s][14,   101] loss: 0.102
+200it [00:38,  5.26it/s][14,   201] loss: 0.111
+300it [00:58,  5.28it/s][14,   301] loss: 0.125
+391it [01:15,  5.18it/s]
+Accuracy of the network on the 10000 test images: 80.64%
+0it [00:00, ?it/s][15,     1] loss: 0.000
+100it [00:19,  5.27it/s][15,   101] loss: 0.083
+200it [00:38,  5.27it/s][15,   201] loss: 0.101
+300it [00:57,  5.27it/s][15,   301] loss: 0.107
+391it [01:15,  5.19it/s]
+Accuracy of the network on the 10000 test images: 80.67%
+0it [00:00, ?it/s][16,     1] loss: 0.000
+100it [00:19,  5.13it/s][16,   101] loss: 0.076
+200it [00:39,  5.19it/s][16,   201] loss: 0.089
+300it [00:58,  5.16it/s][16,   301] loss: 0.093
+391it [01:16,  5.10it/s]
+Accuracy of the network on the 10000 test images: 80.44%
+0it [00:00, ?it/s][17,     1] loss: 0.000
+100it [00:19,  5.18it/s][17,   101] loss: 0.073
+200it [00:39,  5.18it/s][17,   201] loss: 0.083
+300it [00:59,  5.11it/s][17,   301] loss: 0.099
+391it [01:17,  5.08it/s]
+Accuracy of the network on the 10000 test images: 80.40%
+0it [00:00, ?it/s][18,     1] loss: 0.000
+100it [00:19,  5.35it/s][18,   101] loss: 0.064
+200it [00:38,  5.35it/s][18,   201] loss: 0.072
+300it [00:57,  5.34it/s][18,   301] loss: 0.084
+391it [01:14,  5.25it/s]
+Accuracy of the network on the 10000 test images: 80.07%
+0it [00:00, ?it/s][19,     1] loss: 0.000
+100it [00:19,  5.22it/s][19,   101] loss: 0.066
+200it [00:39,  5.17it/s][19,   201] loss: 0.073
+300it [00:58,  5.26it/s][19,   301] loss: 0.071
+391it [01:16,  5.12it/s]
+Accuracy of the network on the 10000 test images: 80.61%
+0it [00:00, ?it/s][20,     1] loss: 0.000
+100it [00:19,  5.11it/s][20,   101] loss: 0.057
+200it [00:39,  5.14it/s][20,   201] loss: 0.074
+300it [00:58,  5.25it/s][20,   301] loss: 0.076
+391it [01:16,  5.11it/s]
+Accuracy of the network on the 10000 test images: 80.84%
+Accuracy of the network on the 10000 test images: 80.84%
+Traceback (most recent call last):
