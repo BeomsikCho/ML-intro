@@ -2,7 +2,7 @@ setup_cfg:
   device: 'cuda:6'
 
 data_cfg:
-  data_root: './data'
+  data_root: './dataset'
   batch_size: 128
 
 model_cfg:

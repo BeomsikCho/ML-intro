@@ -3,11 +3,12 @@ import torchvision
 import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
+from torchvision.datasets import ImageFolder
+
 from torchvision import models
 from torchvision import utils
 import torch.nn as nn
 import torch.nn.functional as F
-from torchsummary import summary
 from torch import optim
 import matplotlib.pyplot as plt
 
@@ -20,7 +21,6 @@ import time
 import copy
 from tqdm import tqdm
 
-from lion_pytorch import Lion
 
 # --------------------------------------- 건들지 말 것 ---------------------------------------
 # Define argparse arguments
@@ -60,10 +60,14 @@ transform = transforms.Compose([
 trainset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=True,  download=True, transform=transform)
 trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
 
-testset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=False,
-                                       download=True, transform=transform)
-testloader = DataLoader(testset, batch_size=BATCH_SIZE, num_workers=4, shuffle=False)
+# testset = torchvision.datasets.CIFAR10(root=DATA_ROOT, train=False,
+#                                        download=True, transform=transform)
+# testloader = DataLoader(testset, batch_size=1, num_workers=4, shuffle=False)
 
+#test 용
+data_dir = "./dataset/custom_dataset"
+dataset = ImageFolder(root = data_dir, transform = transform)
+testloader = DataLoader(dataset, batch_size=1, num_workers=4, shuffle=False)
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -215,7 +219,7 @@ print(output.size())
 
 # Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-opt = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
+opt = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
 optimizer = opt
 
 from torch.optim.lr_scheduler import ReduceLROnPlateau
